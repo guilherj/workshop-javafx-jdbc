@@ -9,6 +9,10 @@ import javafx.scene.control.ScrollPane;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+		
+	// Expondo uma referência (como atributo) da cena da janela principal.
+	private static Scene mainScene;
+	
 	@Override
 	public void start(Stage primaryStage) {
 		try {
@@ -22,14 +26,24 @@ public class Main extends Application {
 			 */
 			scrollPane.setFitToHeight(true);
 			scrollPane.setFitToWidth(true);
-						
-			Scene mainScene = new Scene(scrollPane);
+			
+			// CENA PRINCIPAL
+			mainScene = new Scene(scrollPane);
 			primaryStage.setScene(mainScene);
 			primaryStage.setTitle("Sample JavaFX application");
 			primaryStage.show();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	
+	/*
+	 *  Método get do atributo da cena principal pois o atributo está como private
+	 *  Por Boas Práticas da programação onde todo atributo deve ser private.
+	 */	
+	public static Scene getMainScene() {
+		return mainScene;
 	}
 
 	public static void main(String[] args) {
