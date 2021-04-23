@@ -1,9 +1,12 @@
 package gui;
 
 import java.net.URL;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import application.Main;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -12,9 +15,21 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import model.entities.Department;
+import model.services.DepartmentService;
 
 public class DepartmentListController implements Initializable {
-
+	
+	/*
+	 * declarando a dependência da classe controller com a classe service de department
+	 * mais sem injetar a depenência dentro da classe, abaixo é criado a função setDepartmentService
+	 * para poder injetar essa dependência em outro lugar no programa.
+	 * 
+	 * Isso é um principio de acoplamento forte, muito recomendado de ser feito no java,
+	 * caso tenha dúvidas sobre esse assunto assistir a aula do curso Java Completo do Prof Nélio na Udemy
+	 * no módulo de interfaces que é explicado esse conceito lá.
+	 */
+	private DepartmentService service;
+	
 	@FXML
 	private TableView<Department> tableViewDepartment;
 	
@@ -30,6 +45,17 @@ public class DepartmentListController implements Initializable {
 	@FXML
 	public void onbtNewAction() {
 		System.out.println("btNew Funcionando");
+	}
+	
+	/*
+	 * List do Java FX, pode ser usado para receber os dados de um list comum e depois
+	 * carregar numa tableview. 
+	 */
+	private ObservableList<Department> obsList;
+	
+	// Criado o setDepartmentSet para injetar a depenência do serviço em outro lugar no programa.
+	public void setDepartmentService(DepartmentService service) {
+		this.service = service;
 	}
 	
 	@Override
@@ -55,6 +81,32 @@ public class DepartmentListController implements Initializable {
 		Stage stage = (Stage) Main.getMainScene().getWindow();
 		tableViewDepartment.prefHeightProperty().bind(stage.heightProperty());
 		
+	}
+	
+	/*
+	 * Método que servirá para acessar o service, pegar a lista e carregar a mesma na ObservableList
+	 * declarada mais acima.
+	 * 
+	 * o objetivo é carregar a lista no observableList e depois esse observableList carregar na tableView,
+	 * para que os dados possam ser mostrados na view do DepartmentList
+	 */
+	public void updateTableView() {
+		
+		/*
+		 * Essa exceção é para proteger o método caso o programador esqueça de declarar a injeção de dependência do
+		 * servico que nesse caso é o setDepartmentService, a exceção será lançada de propósito para
+		 * que o programador veja que esqueçeu.
+		 */
+		if(service == null) {
+			throw new IllegalStateException("Service was null");
+		}
+		
+		// acessou a lista do service, carregou no obsList e setou os itens no tableViewDepartment
+		List<Department> list = service.findAll();
+		obsList = FXCollections.observableArrayList(list);
+		tableViewDepartment.setItems(obsList);
+		
+		// Agora tem que chamar esse método, isso será feito lá na MainViewController
 	}
 
 }

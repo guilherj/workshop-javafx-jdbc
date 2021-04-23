@@ -20,6 +20,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
+import model.services.DepartmentService;
 
 public class MainViewController implements Initializable {
 
@@ -39,7 +40,12 @@ public class MainViewController implements Initializable {
 
 	@FXML
 	public void onMenuItemDepartmentAction() {
-		loadView("/gui/DepartmentList.fxml");
+		loadView2("/gui/DepartmentList.fxml"); 
+		/*
+		 * Criado o metodo loadView2 somente para poder carregar os dados
+		 * da list em DepartmentService na tableView enquanto não é feito a integração com o banco de dados.
+		 * a implementação desse novo método temporário está mais lá em baixo.
+		 */
 	}
 
 	@FXML
@@ -116,6 +122,35 @@ public class MainViewController implements Initializable {
 			 * loader recebe o recurso  que é passado pelo parâmetro do método.
 			 */
 
+		} catch (IOException e) {
+			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), Alert.AlertType.ERROR);
+
+		}
+	}
+	
+	public synchronized void loadView2(String absoluteName) {
+
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+			VBox newVBox = loader.load();
+			
+			Scene mainScene = Main.getMainScene();
+			VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
+			
+			Node mainMenu = mainVBox.getChildren().get(0);
+			mainVBox.getChildren().clear();
+			mainVBox.getChildren().add(mainMenu);
+			mainVBox.getChildren().addAll(newVBox.getChildren());
+			
+			/*
+			 * Foi pego a referência do controller da view, injetado a depenência do DepartmentService
+			 * e feito a chamada do método updateTableView que mostrará os dados da List na tableView da 
+			 * view DepartmentList
+			 */ 
+			DepartmentListController controller = loader.getController();
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
+			
 		} catch (IOException e) {
 			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), Alert.AlertType.ERROR);
 
