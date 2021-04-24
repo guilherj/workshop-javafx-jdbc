@@ -8,6 +8,7 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import application.Main;
 import gui.util.Alerts;
@@ -38,14 +39,23 @@ public class MainViewController implements Initializable {
 		System.out.println("TESTE MENU ITEM SELLER, FUNCIONANDO");
 	}
 
+	
+	/*
+	 * Chamada do método loadView() passando como parâmetro o caminho da View que deve-se carregar
+	 * que nesse caso é o About.fxml
+	 * 
+	 * E passando uma expressão lambda onde passa uma função que recebe como parâmetro um objeto do tipo 
+	 * DepartmentListController com nome controller, esse objeto chama o método setDepartmentService, esse método 
+	 * instancia um new DepartmentService e depois chama o método updateTableView. toda essa função é passada como 
+	 * parâmetro para o método loadView.
+	 */
 	@FXML
 	public void onMenuItemDepartmentAction() {
-		loadView2("/gui/DepartmentList.fxml"); 
-		/*
-		 * Criado o metodo loadView2 somente para poder carregar os dados
-		 * da list em DepartmentService na tableView enquanto não é feito a integração com o banco de dados.
-		 * a implementação desse novo método temporário está mais lá em baixo.
-		 */
+		loadView("/gui/DepartmentList.fxml", (DepartmentListController controller) -> {
+			controller.setDepartmentService(new DepartmentService());
+			controller.updateTableView();
+		}); 
+		
 	}
 
 	@FXML
@@ -53,8 +63,10 @@ public class MainViewController implements Initializable {
 		/*
 		 * Chamada do método loadView() passando como parâmetro o caminho da View que deve-se carregar
 		 * que nesse caso é o About.fxml
+		 * 
+		 * E passando uma expressão lambda onde passa uma função x que no abrir e fechar as aspas não executa nada.
 		 */
-		loadView("/gui/About.fxml");
+		loadView("/gui/About.fxml", x ->{});
 	}
 
 	@Override
@@ -68,8 +80,11 @@ public class MainViewController implements Initializable {
 	 *
 	 *  ADICIONAR A PALAVRA "synchronized" PARA EVITAR QUE O PROCESSAMENTO DO MÉTODO NÃO SEJA INTERROMPIDO
 	 *  DURANTO O PROCESSO.
+	 *  
+	 *  o método recebe o caminho da view que deve carregar (String absoluteName), e recebe um objeto consumer do tipo T 
+	 *  qualquer que será uma função para executar qualquer lógica necessária para carregar os elementos de uma view.
 	 */
-	public synchronized void loadView(String absoluteName) {
+	public synchronized <T> void loadView(String absoluteName, Consumer<T> initializingAction) {
 
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
@@ -106,21 +121,26 @@ public class MainViewController implements Initializable {
 			 * principal tem que apagar os childrens com o comando "getChildern().clean()" mais como guardamos toda
 			 * a informação do conteúdo da VBox nas referências anteriores podemos apagar e adicionar posteriormente.
 			 * 
-			 */
-			mainVBox.getChildren().clear();
-			mainVBox.getChildren().add(mainMenu);
-			mainVBox.getChildren().addAll(newVBox.getChildren());
-			
-			/*
-			 * ^
-			 * ^
-			 * ^ COMENTÁRIO DO CÓDIGO ACIMA
 			 * O código "getChildren().add()" adiciona as referências que guardamos anteriormente passando eles como
 			 * parâmetros dentro dos parênteses, e o código "getChildren().addAll()" adiciona todo um
 			 * elemento que é passado como parâmetro dentro dos parênteses, que nesse caso é o newVBox instanciado lá em
 			 * cima no inicio desse método. Já a newVBox recebe o contéudo que está dentro de loader, esse
 			 * loader recebe o recurso  que é passado pelo parâmetro do método.
 			 */
+			mainVBox.getChildren().clear();
+			mainVBox.getChildren().add(mainMenu);
+			mainVBox.getChildren().addAll(newVBox.getChildren());
+									
+			/*
+			 * o loader.getController() pega o controller do tipo T qualquer, passado pelo parâmetro da função
+			 * loadView e carrega no objeto controller do tipo T qualquer. 
+			 * 
+			 * O objeto initializingAction.accept() executará a função que será passada no argumento da chamada deste método
+			 * e mandará o controller recebido na linha de cima como argumento.
+			 * 
+			 */
+			T controller = loader.getController();
+			initializingAction.accept(controller);
 
 		} catch (IOException e) {
 			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), Alert.AlertType.ERROR);
@@ -128,33 +148,6 @@ public class MainViewController implements Initializable {
 		}
 	}
 	
-	public synchronized void loadView2(String absoluteName) {
-
-		try {
-			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
-			VBox newVBox = loader.load();
-			
-			Scene mainScene = Main.getMainScene();
-			VBox mainVBox = (VBox) ((ScrollPane) mainScene.getRoot()).getContent();
-			
-			Node mainMenu = mainVBox.getChildren().get(0);
-			mainVBox.getChildren().clear();
-			mainVBox.getChildren().add(mainMenu);
-			mainVBox.getChildren().addAll(newVBox.getChildren());
-			
-			/*
-			 * Foi pego a referência do controller da view, injetado a depenência do DepartmentService
-			 * e feito a chamada do método updateTableView que mostrará os dados da List na tableView da 
-			 * view DepartmentList
-			 */ 
-			DepartmentListController controller = loader.getController();
-			controller.setDepartmentService(new DepartmentService());
-			controller.updateTableView();
-			
-		} catch (IOException e) {
-			Alerts.showAlert("IO Exception", "Error loading view", e.getMessage(), Alert.AlertType.ERROR);
-
-		}
-	}
+	
 
 }
