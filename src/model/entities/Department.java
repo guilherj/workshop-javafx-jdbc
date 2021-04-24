@@ -34,6 +34,11 @@ public class Department implements Serializable {
 	}
 
 	@Override
+	public String toString() {
+		return "Department [id=" + id + ", name=" + name + "]";
+	}
+
+	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -57,9 +62,7 @@ public class Department implements Serializable {
 			return false;
 		return true;
 	}
+	
+	
 
-	@Override
-	public String toString() {
-		return "Department [id=" + id + ", name=" + name + "]";
-	}
 }
