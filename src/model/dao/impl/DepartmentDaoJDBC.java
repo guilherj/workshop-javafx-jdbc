@@ -169,11 +169,11 @@ public class DepartmentDaoJDBC implements DepartmentDao {
 		}
 	}
 
+	
 	/*
 	 * MÉTODO AUXILIAR PARA INSTANCIAÇÃO DO OBJETO DEPARTMENT DENTRO DA CLASSE
 	 * DepartmentDaoJDBC, A EXPLICAÇÃO DO PORQUE ESTÁ NA CLASSE SellerDaoJDBC.
 	 */
-
 	private Department instantiateDepartment(ResultSet rs) throws SQLException {
 		Department dep = new Department();
 		dep.setId(rs.getInt("Id"));

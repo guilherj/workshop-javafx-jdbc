@@ -1,3 +1,8 @@
+/*
+ * Classe Utilitária de Alertas para mostrar as exceções que podem ser lançadas no programa.
+ * 
+ */
+
 
 package gui.util;
 
