@@ -53,8 +53,13 @@ public class DepartmentListController implements Initializable {
 	
 	@FXML
 	public void onbtNewAction(ActionEvent event) {
-		Stage parentStage = Utils.currentStage(event);
-		createDialogForm("/gui/DepartmentForm.fxml", parentStage);
+		Stage parentStage = Utils.currentStage(event); // Captando o palco que fez a chamada.
+		
+		/* Por ser um botão para cadastrar um novo department instancia-se um objeto vazio e passa ele como argumento
+		 * na chamada da tela.
+		 */
+		Department obj = new Department();
+		createDialogForm(obj, "/gui/DepartmentForm.fxml", parentStage);
 		
 	}
 	
@@ -120,11 +125,20 @@ public class DepartmentListController implements Initializable {
 		// Agora tem que chamar esse método, isso será feito lá na MainViewController
 	}
 	
-	private void createDialogForm(String absoluteName, Stage parentStage) {
+	private void createDialogForm(Department obj, String absoluteName, Stage parentStage) {
 		
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
 			Pane pane = loader.load();
+			
+			// Pegando o controller da tela que carregou na variável loader
+			DepartmentFormController controller = loader.getController(); 
+			
+			// Injetando o objeto no controller da view
+			controller.setDepartment(obj);
+			
+			// Carregando os dados do objeto para o formulário
+			controller.updateFormData();
 			
 			/*
 			 * Quando for instanciar uma janela de dialog modal na frente de outra janela
