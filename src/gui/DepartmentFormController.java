@@ -1,9 +1,12 @@
 package gui;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
 
 import db.DbException;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Constraints;
 import gui.util.Utils;
@@ -24,6 +27,9 @@ public class DepartmentFormController implements Initializable {
 	
 	// Injetando Dependência da classe DepartmentService
 	private DepartmentService service;
+	
+	// Lista criada para que os objetos possam se inscrever e possam ouvir quando um evento de seu interesse for feito nesse objeto.
+	private List<DataChangeListener> dataChangeListeners = new ArrayList<>();
 	
 	@FXML
 	private TextField txtId;
@@ -48,6 +54,17 @@ public class DepartmentFormController implements Initializable {
 	public void setDepartmentService(DepartmentService service) {
 		this.service = service;
 	}
+	
+	
+	/*  Método para que outros objetos possam se inscrever na lista.
+	 *  
+	 *  Assim outros objetos,  desde que implementem a interface DataChangeListener,
+	 *  conseguem se increver na lista para receber o evento desta classe
+	 */
+	public void subscribeDataChangeListener(DataChangeListener listener) {
+		dataChangeListeners.add(listener);
+	}
+	
 		
 	/* Necessário passar um ActionEvent como parâmetro para pegar a ação de apertar o botão save e passar essa ação ao
 	 * método currentStage usado mais abaixo na hora de fechar a janela do formulário.
@@ -78,6 +95,12 @@ public class DepartmentFormController implements Initializable {
 		// Chamando o método para salvar o objeto com os dados do formulário dentro do BD
 		service.saveOrUpdate(entity);
 		
+		
+		/* Chamada do método para que quando for feita a operação de salvar o objeto no banco de dados
+		 * os objetos inscritos na lista dataChangeListeners possam ser notificados dessa ação.
+		 */
+		notifyDataChangeListeners(); 
+		
 		/* Pegando a referência do palco que fez a chamada do formulário e usando a função close para fechar a janela
 		 * quando concluir a operação de salvar o objeto.
 		 */
@@ -88,6 +111,21 @@ public class DepartmentFormController implements Initializable {
 		}
 	}
 	
+	/*
+	 * Método responsável por notificar os objetos da lista dataChangeListeners que uma ação de seu interesse
+	 * foi executada. E como os objetos são notificados? Executando o método onDataChanged() da interface DataChangeListener
+	 * 
+	 * Por isso essa classe DepartmentFormController é chamada de subject, por que ela é uma classe que emite o evento e apenas implementa
+	 * o método da interface mais não assina o contrato da mesma.
+	 */
+	private void notifyDataChangeListeners() {
+		
+		for(DataChangeListener listener : dataChangeListeners) {
+			listener.onDataChange();
+		}
+		
+	}
+
 	// Método para pegar as informações preenchidas nos TextFileds do formulário
 	private Department getFormData() {
 		Department obj = new Department();

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 import application.Main;
+import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
 import javafx.collections.FXCollections;
@@ -26,7 +27,12 @@ import javafx.stage.Stage;
 import model.entities.Department;
 import model.services.DepartmentService;
 
-public class DepartmentListController implements Initializable {
+
+/*
+ * Essa classe implementa a interface DataChangeListener pois ela sera classe que ouvirá (Observer) e recebrá a notificação
+ * da ação feita pela classe subject que nesse caso é o DepartmentFormController.
+ */
+public class DepartmentListController implements Initializable, DataChangeListener {
 	
 	/*
 	 * declarando a dependência da classe controller com a classe service de department
@@ -131,14 +137,23 @@ public class DepartmentListController implements Initializable {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
 			Pane pane = loader.load();
 			
+			
 			// Pegando o controller da tela que carregou na variável loader
 			DepartmentFormController controller = loader.getController(); 
+			
 			
 			// Injetando a dependência da classe entidade no controller da view
 			controller.setDepartment(obj);
 			
+			
 			// Injetando a dependência do serviço no controller da view
 			controller.setDepartmentService(new DepartmentService());
+			
+			
+			/* Inscrevendo a própria classe (DeparmentListController) na lista de notificações de evento implementada
+			 * na classe DepartmentFormController, ao receber a notificação é executado o método da interface
+			 * onDataChange() implementado mais abaixo */
+			controller.subscribeDataChangeListener(this);
 			
 			// Carregando os dados do objeto para o formulário
 			controller.updateFormData();
@@ -163,6 +178,18 @@ public class DepartmentListController implements Initializable {
 		} catch (IOException e) {
 			Alerts.showAlert("IO Exception", "Error load View", e.getMessage(), AlertType.ERROR);
 		}
+	}
+
+	/*
+	 * Método da interface que servirá para executar a ação necessária após o evento ser executado
+	 * pela classe subject e essa classe que é a observer ser notificada
+	 */
+	@Override
+	public void onDataChange() {
+		
+		// Ação necessária quando a notificação do evento executado é disparada.
+		updateTableView();
+		
 	}
 
 }
