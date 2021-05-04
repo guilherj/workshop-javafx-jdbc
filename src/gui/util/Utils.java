@@ -17,5 +17,18 @@ public class Utils {
 	public static Stage currentStage(ActionEvent event) {
 		return (Stage) ((Node) event.getSource()).getScene().getWindow();
 	}
+	
+	/* Método utilitário para converter valores string que vierem das text fields para integer
+	 * 
+	 * Caso o valor passado não for um integer válido retornar null.
+	 */
+	public static Integer tryParseToInt(String str) {
+		try {
+		return Integer.parseInt(str);
+		
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
 
 }
