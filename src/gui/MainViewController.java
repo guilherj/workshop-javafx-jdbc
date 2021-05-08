@@ -22,6 +22,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.VBox;
 import model.services.DepartmentService;
+import model.services.SellerService;
 
 public class MainViewController implements Initializable {
 
@@ -36,13 +37,16 @@ public class MainViewController implements Initializable {
 
 	@FXML
 	public void onMenuItemSellerAction() {
-		System.out.println("TESTE MENU ITEM SELLER, FUNCIONANDO");
+		loadView("/gui/SellerList.fxml", (SellerListController controller) -> {
+			controller.setSellerService(new SellerService());
+			controller.updateTableView();
+		}); 
 	}
 
 	
 	/*
 	 * Chamada do método loadView() passando como parâmetro o caminho da View que deve-se carregar
-	 * que nesse caso é o About.fxml
+	 * que nesse caso é o DepartmentList.fxml
 	 * 
 	 * E passando uma expressão lambda onde passa uma função que recebe como parâmetro um objeto do tipo 
 	 * DepartmentListController com nome controller, esse objeto chama o método setDepartmentService, esse método 
