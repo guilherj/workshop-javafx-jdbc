@@ -3,9 +3,11 @@ package gui;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import application.Main;
+import db.DbIntegrityException;
 import gui.listeners.DataChangeListener;
 import gui.util.Alerts;
 import gui.util.Utils;
@@ -19,6 +21,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -59,6 +62,9 @@ public class DepartmentListController implements Initializable, DataChangeListen
 
 	@FXML
 	private TableColumn<Department, Department> tableColumnEDIT;
+
+	@FXML
+	private TableColumn<Department, Department> tableColumnREMOVE;
 
 	@FXML
 	private Button btNew;
@@ -137,6 +143,7 @@ public class DepartmentListController implements Initializable, DataChangeListen
 		obsList = FXCollections.observableArrayList(list);
 		tableViewDepartment.setItems(obsList);
 		initEditButtons(); // Chamando o método responsável por criar um botão edit em cada linha da tabela Department.
+		initRemoveButtons(); // Chamando o método responsável por criar um botão remove em cada linha da tabela Department.
 
 		// Agora tem que chamar esse método, isso será feito lá na MainViewController
 	}
@@ -205,11 +212,11 @@ public class DepartmentListController implements Initializable, DataChangeListen
 	}
 
 	/*
-	 *  Método que serve para criar um botão Edit em cada linha da tabela de Department
-	 *  Ao clicar no botão ele vai carregar o formulário de Department para edita-lo usando o método 
-	 *  criado anteriormente createDialogForm.
-	 *  
-	 */	
+	 * Método que serve para criar um botão Edit em cada linha da tabela de
+	 * Department Ao clicar no botão ele vai carregar o formulário de Department
+	 * para edita-lo usando o método criado anteriormente createDialogForm.
+	 * 
+	 */
 	private void initEditButtons() {
 		tableColumnEDIT.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
 		tableColumnEDIT.setCellFactory(param -> new TableCell<Department, Department>() {
@@ -227,6 +234,52 @@ public class DepartmentListController implements Initializable, DataChangeListen
 						event -> createDialogForm(obj, "/gui/DepartmentForm.fxml", Utils.currentStage(event)));
 			}
 		});
+	}
+
+	/*
+	 * Método para criar um button com nome "remove" , ao clicar no botão ele vai chamar o método
+	 * removeEntity para fazer a removação do objeto.
+	 */
+	private void initRemoveButtons() {
+		tableColumnREMOVE.setCellValueFactory(param -> new ReadOnlyObjectWrapper<>(param.getValue()));
+		tableColumnREMOVE.setCellFactory(param -> new TableCell<Department, Department>() {
+			private final Button button = new Button("remove");
+
+			@Override
+			protected void updateItem(Department obj, boolean empty) {
+				super.updateItem(obj, empty);
+				if (obj == null) {
+					setGraphic(null);
+					return;
+				}
+				setGraphic(button);
+				button.setOnAction(event -> removeEntity(obj)); // Chamada do método removeEntity
+			}
+		});
+	}
+
+	// Método para remover uma entidade.
+	public void removeEntity(Department obj) {
+		Optional<ButtonType> result = Alerts.showConfirmation("Confirmation", "Are you sure to delete?");
+		
+		/*
+		 *  Se o usuário clicar no botão OK do alert confirmation, ou seja
+		 *  confirmar a deleção do objeto, deve-se chamar o service.remove
+		 *  depois de deletar chamar o updateTableView para atualizar a tableview
+		 */		
+		if(result.get() == ButtonType.OK) {
+			if(service == null) {
+				throw new IllegalStateException("Service was null");
+			}
+			
+			try {
+			service.remove(obj);
+			updateTableView();
+			
+			}catch (DbIntegrityException e) {
+				Alerts.showAlert("Error removing object", null, e.getMessage(), AlertType.ERROR);
+			}
+		}
 	}
 
 }
