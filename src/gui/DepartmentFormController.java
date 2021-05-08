@@ -3,7 +3,9 @@ package gui;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.Set;
 
 import db.DbException;
 import gui.listeners.DataChangeListener;
@@ -13,11 +15,12 @@ import gui.util.Utils;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Alert.AlertType;
 import model.entities.Department;
+import model.exceptions.ValidationException;
 import model.services.DepartmentService;
 
 public class DepartmentFormController implements Initializable {
@@ -106,6 +109,14 @@ public class DepartmentFormController implements Initializable {
 		 */
 		Utils.currentStage(event).close();
 		
+		/*
+		 * Agora o método getFormData() pode lançar uma ValidationException então agora temos que
+		 * tratar dessa exception por um novo catch. E nesse tratamento vamos lançar o método
+		 * setErrorMessage que foi implementado mais abaixo na classe.
+		 */		
+		}catch (ValidationException e) {
+			setErrorMessages(e.getErrors());
+		
 		}catch (DbException e) {
 			Alerts.showAlert("Error Saving Object", null, e.getMessage(), AlertType.ERROR);
 		}
@@ -130,9 +141,34 @@ public class DepartmentFormController implements Initializable {
 	private Department getFormData() {
 		Department obj = new Department();
 		
+		//Instanciando a classe de ValidationException dentro do método.
+		ValidationException exception = new ValidationException("Validation Error");
+		
 		// Como o txtId recebe um integer faz se a conversão para String usando o método auxiliar criado anteriormente no pacote Utils
 		obj.setId(Utils.tryParseToInt(txtId.getText()));
-		obj.setName(txtName.getText());
+		
+		/*
+		 * Fazendo a verificação no textField txtName, nessa verificação o textFields não pode ficar vazio.
+		 *
+		 * trim() -> Está eliminando todo espaço vazio no inicio e no final do TextField 
+		 * equals("") -> O equals com as aspas dentro dos parênteses verifica se o text Fileds está em branco.
+		 * 
+		 *** Lendo o If: Se o txtname estiver valendo nulo ou se estiver vazio adiciona o erro na coleção de erros da classe
+		 *  ValidationException.
+		 * 
+		 */
+		if(txtName.getText() == null || txtName.getText().trim().equals("")) {
+			exception.addError("name", "Field can't be empty");
+		}
+		obj.setName(txtName.getText()); // Setando o nome, mesmo vazio.
+		
+		/*
+		 * testando se foi adicionado algum erro na coleção de erros, se tiver sido adicionado algum
+		 * e o tamanho for maior que 0 lança a exceção.
+		 */
+		if(exception.getErrors().size() > 0) {
+			throw exception;
+		}
 		
 		return obj;
 	}
@@ -164,6 +200,25 @@ public class DepartmentFormController implements Initializable {
 		// Como o textFied trabalha com texto é necessário converter o Id que é integer para String.
 		txtId.setText(String.valueOf(entity.getId()));  
 		txtName.setText(entity.getName());
+	}
+	
+	// Método para setar os erros nas label's de erro no formulário, se houver
+	private void setErrorMessages(Map<String, String> errors) {
+		
+		/* Percorrendo o Map e pegando todas as chaves que tiverem na coleção e passando para a váriavel fields
+		 * que é do tipo Set, Set é uma outra coleção. 
+		 */
+		Set<String> fields = errors.keySet();
+		
+		/*
+		 * Verificando se em fields contém uma chave com nome "name" , se tiver 
+		 * setar na labelErrorName a mensagem que estiver relacionada a chave "name" da coleção Map.
+		 */
+		if(fields.contains("name")) {
+			labelErrorName.setText(errors.get("name"));
+		}
+		
+		
 	}
 	
 	

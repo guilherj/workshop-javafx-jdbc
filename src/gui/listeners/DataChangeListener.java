@@ -8,7 +8,7 @@
  * Termos usados:
  * 
  * ** Subject - são os objetos que emitem o evento  ser escutado pelos Observers.
- * ** Observer - São os objetos que receberam uma notificação quando o evento for executado para que possa executar suas operações necessárias.
+ * ** Observer - São os objetos que receberão uma notificação quando o evento for executado para que possa executar suas operações necessárias.
  *
  * Mais explicações desse assunto nas classes DepartmentFormController e DepartmentListController
  * 
