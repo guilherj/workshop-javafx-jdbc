@@ -1,6 +1,7 @@
 package gui;
 
 import java.net.URL;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.ResourceBundle;
@@ -54,6 +55,15 @@ public class SellerListController implements Initializable, DataChangeListener {
 
 	@FXML
 	private TableColumn<Seller, String> tableColumnName;
+	
+	@FXML
+	private TableColumn<Seller, String> tableColumnEmail;
+	
+	@FXML
+	private TableColumn<Seller, Date> tableColumnBirthDate;
+	
+	@FXML
+	private TableColumn<Seller, Double> tableColumnBaseSalary;
 
 	@FXML
 	private TableColumn<Seller, Seller> tableColumnEDIT;
@@ -101,8 +111,28 @@ public class SellerListController implements Initializable, DataChangeListener {
 	 * deve, após criar o método deve-se chama-lo no método initialize()
 	 */
 	private void initializeNodes() {
+		
+		// Passando a variável da classe para as propriedades das colunas
 		tableColumnId.setCellValueFactory(new PropertyValueFactory<>("id"));
 		tableColumnName.setCellValueFactory(new PropertyValueFactory<>("name"));
+		tableColumnEmail.setCellValueFactory(new PropertyValueFactory<>("email"));
+		
+		/*
+		 * Após determinar as propriedades da tablecolumn e associando com a variável da classe
+		 * chamar o método da classe Utils para formatar a coluna com data passando nos parâmetros
+		 * o nome da tablecolumn e a máscara de date que deseja usar. 
+		 */
+		tableColumnBirthDate.setCellValueFactory(new PropertyValueFactory<>("birthDate"));
+		Utils.formatTableColumnDate(tableColumnBirthDate, "dd/MM/yyyy");
+		
+		/*
+		 * Após determinar as propriedades da tablecolumn e associando com a variável da classe
+		 * chamar o método da classe Utils para formatar a coluna com valor tipo double passando nos parâmetros
+		 * o nome da tablecolumn e quantas casas decimais deseja que saia na coluna. 
+		 */
+		tableColumnBaseSalary.setCellValueFactory(new PropertyValueFactory<>("baseSalary"));
+		Utils.formatTableColumnDouble(tableColumnBaseSalary, 2);
+		
 
 		/*
 		 * Macete para que a tableView que nesse caso é a tableViewSeller, acompanhe
