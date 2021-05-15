@@ -1,5 +1,6 @@
 package gui;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Date;
 import java.util.List;
@@ -16,7 +17,9 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
@@ -24,6 +27,8 @@ import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Pane;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Seller;
 import model.services.SellerService;
@@ -174,53 +179,53 @@ public class SellerListController implements Initializable, DataChangeListener {
 	}
 
 	private void createDialogForm(Seller obj, String absoluteName, Stage parentStage) {
-//
-//		try {
-//			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
-//			Pane pane = loader.load();
-//
-//			// Pegando o controller da tela que carregou na variável loader
-//			SellerFormController controller = loader.getController();
-//
-//			// Injetando a dependência da classe entidade no controller da view
-//			controller.setSeller(obj);
-//
-//			// Injetando a dependência do serviço no controller da view
-//			controller.setSellerService(new SellerService());
-//
-//			/*
-//			 * Inscrevendo a própria classe (DeparmentListController) na lista de
-//			 * notificações de evento implementada na classe SellerFormController, ao
-//			 * receber a notificação é executado o método da interface onDataChange()
-//			 * implementado mais abaixo
-//			 */
-//			controller.subscribeDataChangeListener(this);
-//
-//			// Carregando os dados do objeto para o formulário
-//			controller.updateFormData();
-//
-//			/*
-//			 * Quando for instanciar uma janela de dialog modal na frente de outra janela
-//			 * deve-se instanciar um novo Stage, será um palco na frente do outro.
-//			 */
-//			Stage dialogStage = new Stage();
-//			dialogStage.setTitle("Enter Seller data");
-//
-//			dialogStage.setScene(new Scene(pane)); // Carrega uma nova cena com a view que foi carregada na variavel
-//													// pane
-//
-//			dialogStage.setResizable(false); // A Janela não pode ser redimensionada.
-//
-//			dialogStage.initOwner(parentStage); // Indica quem é a cena pai desse dialog.
-//
-//			dialogStage.initModality(Modality.WINDOW_MODAL); // Indica se a janela é modal ou não, ou seja,
-//			// Se for modal não é possivel clica na janela de baixo enquanto a janela modal
-//			// estiver aberta.
-//			dialogStage.showAndWait();
-//
-//		} catch (IOException e) {
-//			Alerts.showAlert("IO Exception", "Error load View", e.getMessage(), AlertType.ERROR);
-//		}
+
+		try {
+			FXMLLoader loader = new FXMLLoader(getClass().getResource(absoluteName));
+			Pane pane = loader.load();
+
+			// Pegando o controller da tela que carregou na variável loader
+			SellerFormController controller = loader.getController();
+
+			// Injetando a dependência da classe entidade no controller da view
+			controller.setSeller(obj);
+
+			// Injetando a dependência do serviço no controller da view
+			controller.setSellerService(new SellerService());
+
+			/*
+			 * Inscrevendo a própria classe (SellerListController) na lista de
+			 * notificações de evento implementada na classe SellerFormController, ao
+			 * receber a notificação é executado o método da interface onDataChange()
+			 * implementado mais abaixo
+			 */
+			controller.subscribeDataChangeListener(this);
+
+			// Carregando os dados do objeto para o formulário
+			controller.updateFormData();
+
+			/*
+			 * Quando for instanciar uma janela de dialog modal na frente de outra janela
+			 * deve-se instanciar um novo Stage, será um palco na frente do outro.
+			 */
+			Stage dialogStage = new Stage();
+			dialogStage.setTitle("Enter Seller data");
+
+			dialogStage.setScene(new Scene(pane)); // Carrega uma nova cena com a view que foi carregada na variavel pane
+													
+
+			dialogStage.setResizable(false); // A Janela não pode ser redimensionada.
+
+			dialogStage.initOwner(parentStage); // Indica quem é a cena pai desse dialog.
+
+			dialogStage.initModality(Modality.WINDOW_MODAL); // Indica se a janela é modal ou não, ou seja,
+			// Se for modal não é possivel clica na janela de baixo enquanto a janela modal
+			// estiver aberta.
+			dialogStage.showAndWait();
+
+		} catch (IOException e) {
+			Alerts.showAlert("IO Exception", "Error load View", e.getMessage(), AlertType.ERROR);
+		}
 	}
 
 	/*
