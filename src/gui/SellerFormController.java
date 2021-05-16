@@ -1,9 +1,11 @@
 package gui;
 
 import java.net.URL;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -188,14 +190,14 @@ public class SellerFormController implements Initializable {
 
 	}
 
-	// Método para pegar as informações preenchidas nos TextFileds do formulário
+	// Método para pegar as informações preenchidas no formulário e setar no objeto
 	private Seller getFormData() {
 		Seller obj = new Seller();
 
 		// Instanciando a classe de ValidationException dentro do método.
 		ValidationException exception = new ValidationException("Validation Error");
 
-		// Como o txtId recebe um integer faz se a conversão para String usando o método
+		// Como o txtId recebe um String faz se a conversão para Integer usando o método
 		// auxiliar criado anteriormente no pacote Utils
 		obj.setId(Utils.tryParseToInt(txtId.getText()));
 
@@ -215,6 +217,42 @@ public class SellerFormController implements Initializable {
 			exception.addError("name", "Field can't be empty");
 		}
 		obj.setName(txtName.getText()); // Setando o nome, mesmo vazio.
+
+		// Vale a mesma explicação que está no txtName
+		if (txtEmail.getText() == null || txtEmail.getText().trim().equals("")) {
+			exception.addError("email", "Field can't be empty");
+		}
+		obj.setEmail(txtEmail.getText());
+
+		/*
+		 * Pegando a data do DatePicker que está no formato default do computador do
+		 * usuário e convertendo para um Instant que é o formato independente de
+		 * formato.
+		 * 
+		 * Deve-se testar também se ao clicar no botão save e for feita a instanciação
+		 * do objeto se o DatePicker não for null, ou seja se foi selecionada uma data,
+		 * se for null adicionar o erro na coleção de erros da classe
+		 * ValidationException.
+		 */
+		if (dpBirthDate.getValue() == null) {
+			exception.addError("birthDate", "Field can't be empty");
+		} else {
+			Instant instant = Instant.from(dpBirthDate.getValue().atStartOfDay(ZoneId.systemDefault()));
+			obj.setBirthDate(Date.from(instant)); // Convertendo um objeto do tipo instant para Date
+		}
+
+		// Vale a mesma explicação que está no txtName
+		if (txtBaseSalary.getText() == null || txtBaseSalary.getText().trim().equals("")) {
+			exception.addError("baseSalary", "Field can't be empty");
+		}
+
+		/*
+		 * Como o txtId recebe um String faz se a conversão para Double usando o método
+		 * auxiliar criado anteriormente no pacote Utils
+		 */
+		obj.setBaseSalary(Utils.tryParseToDouble(txtBaseSalary.getText()));
+		
+		obj.setDepartment(comboBoxDepartment.getValue());
 
 		/*
 		 * testando se foi adicionado algum erro na coleção de erros, se tiver sido
@@ -328,13 +366,17 @@ public class SellerFormController implements Initializable {
 		Set<String> fields = errors.keySet();
 
 		/*
-		 * Verificando se em fields contém uma chave com nome "name" , se tiver setar na
-		 * labelErrorName a mensagem que estiver relacionada a chave "name" da coleção
-		 * Map.
+		 * Verificando se em fields contém um erro com uma chave com nome especificado em errors.get() , se tiver setar na
+		 * labelError correspondente a mensagem que estiver relacionada a chave da coleção Map, se não tiver chave nenhuma
+		 * setar para o labelError "" que quer dizer vazio.
+		 * 
+		 *  Foi utilizado o operador ternário "?" que faz o mesmo teste de if em apenas uma linha, porém esse operador
+		 *  só pode ser usado quando o if tiver apenas uma condição.
 		 */
-		if (fields.contains("name")) {
-			labelErrorName.setText(errors.get("name"));
-		}
+		labelErrorName.setText((fields.contains("name") ? errors.get("name") : ""));
+		labelErrorEmail.setText((fields.contains("email") ? errors.get("email") : ""));
+		labelErrorBirthDate.setText((fields.contains("birthDate") ? errors.get("birthDate") : ""));
+		labelErrorBaseSalary.setText((fields.contains("baseSalary") ? errors.get("baseSalary") : ""));
 
 	}
 

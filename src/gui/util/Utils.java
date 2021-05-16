@@ -47,6 +47,21 @@ public class Utils {
 			return null;
 		}
 	}
+	
+	/*
+	 * Método utilitário para converter valores string que vierem das text fields
+	 * para Double
+	 * 
+	 * Caso o valor passado não for um double válido retornar null.
+	 */
+	public static Double tryParseToDouble(String str) {
+		try {
+			return Double.parseDouble(str);
+
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
 
 	/*
 	 * Método auxiliar para formatar a data de uma tableview.
