@@ -31,6 +31,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import model.entities.Seller;
+import model.services.DepartmentService;
 import model.services.SellerService;
 
 /*
@@ -191,7 +192,10 @@ public class SellerListController implements Initializable, DataChangeListener {
 			controller.setSeller(obj);
 
 			// Injetando a dependência do serviço no controller da view
-			controller.setSellerService(new SellerService());
+			controller.setServices(new SellerService(), new DepartmentService());
+			
+			// Chamando o método para carregar os objetos Department dentro da comboBox
+			controller.loadAssociatedObjects();
 
 			/*
 			 * Inscrevendo a própria classe (SellerListController) na lista de
@@ -224,6 +228,7 @@ public class SellerListController implements Initializable, DataChangeListener {
 			dialogStage.showAndWait();
 
 		} catch (IOException e) {
+			e.printStackTrace();
 			Alerts.showAlert("IO Exception", "Error load View", e.getMessage(), AlertType.ERROR);
 		}
 	}
