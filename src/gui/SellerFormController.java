@@ -1,8 +1,11 @@
 package gui;
 
 import java.net.URL;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -17,6 +20,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.DatePicker;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import model.entities.Seller;
@@ -41,7 +45,25 @@ public class SellerFormController implements Initializable {
 	private TextField txtName;
 	
 	@FXML
+	private TextField txtEmail;
+	
+	@FXML
+	private DatePicker dpBirthDate;
+	
+	@FXML
+	private TextField txtBaseSalary;
+	
+	@FXML
 	private Label labelErrorName;
+	
+	@FXML
+	private Label labelErrorEmail;
+	
+	@FXML
+	private Label labelErrorBirthDate;
+	
+	@FXML
+	private Label labelErrorBaseSalary;
 	
 	@FXML
 	private Button btSave;
@@ -180,13 +202,25 @@ public class SellerFormController implements Initializable {
 
 	@Override
 	public void initialize(URL url, ResourceBundle rb) {
-		Seller();
+		initializeNodes();
 		
 	}
 	
-	public void Seller() {
-		Constraints.setTextFieldInteger(txtId);
-		Constraints.setTextFieldMaxLength(txtName, 30);
+	// Esse método é chamado pelo método initialize para sempre que a view for carregada já iniciar com a
+	// Codificação especificada nele.
+	public void initializeNodes() {
+		
+		/*
+		 * Chamada das funções para parametrizar os campos a serem preenchidos pelos usuarios
+		 * como quantos caractéres determinado textfield pode receber ao máximo, o txtBaseSalary
+		 * só receber números do tipo double e qual máscara aceitar receber o DatePicker dpBirthDate
+		 * 
+		 */
+		Constraints.setTextFieldInteger(txtId); 
+		Constraints.setTextFieldMaxLength(txtName, 70);
+		Constraints.setTextFieldDouble(txtBaseSalary);
+		Constraints.setTextFieldMaxLength(txtEmail, 60);
+		Utils.formatDatePicker(dpBirthDate, "dd/MM/yyyy");
 	}
 	
 	// Método para passar os valores do objeto da classe para os Text Fields
@@ -200,6 +234,20 @@ public class SellerFormController implements Initializable {
 		// Como o textFied trabalha com texto é necessário converter o Id que é integer para String.
 		txtId.setText(String.valueOf(entity.getId()));  
 		txtName.setText(entity.getName());
+		txtEmail.setText(entity.getEmail());
+		Locale.setDefault(Locale.US);
+		txtBaseSalary.setText(String.format("%.2f", entity.getBaseSalary()));
+		
+		/* Forma de mostrar na tela a data no formato da maquina do usuário, pois assim independente de localidade e como 
+		 * a data é mostrada nessa localidade, o sistema sempre vai mostrar como é mostrado pelo computador do usuário.
+		 * 
+		 * Fazendo uma programação defensiva com o if para não estourar uma excessão NullPointerException
+		 * Só fará a conversão para data local do usuário quando o dpBirthDate não estiver vazio, foi necessário
+		 * fazer esse if pq quando apertava no botão new estourava a excessão.
+		 */
+		if(entity.getBirthDate() != null) {
+		dpBirthDate.setValue(LocalDate.ofInstant(entity.getBirthDate().toInstant(), ZoneId.systemDefault()));
+		}
 	}
 	
 	// Método para setar os erros nas label's de erro no formulário, se houver
